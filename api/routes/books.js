@@ -16,7 +16,7 @@ const getBook = async (req, res, next) => {
   }
 };
 
-// get all
+// GET all books
 router.get("/", async (req, res) => {
   try {
     const books = await Book.find();
@@ -26,12 +26,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// get one
+// GET a single book
 router.get("/:id", getBook, async (req, res) => {
   res.json(res.book);
 });
 
-// create
+// CREATE a new book
 router.post("/", async (req, res) => {
   const book = new Book({
     title: req.body.title,
@@ -46,7 +46,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// update
+// UPDATE a book
 router.patch("/:id", getBook, async (req, res) => {
   if (req.body.title != null) {
     res.book.title = req.body.title;
@@ -65,7 +65,7 @@ router.patch("/:id", getBook, async (req, res) => {
   }
 });
 
-// delete
+// DELETE a book
 router.delete("/:id", getBook, async (req, res) => {
   try {
     await Book.findByIdAndDelete(req.params.id);
