@@ -6,6 +6,8 @@
     "npm": "9.5.1"
   },
   "scripts": {
+    "install-reactjs": "npm install --prefix reactjs",
+    "install-api": "npm install --prefix api",
     "dev": "concurrently \"npm run api\" \"npm run react\"",
     "start": "cd api && npm start",
     "build": "cd reactjs && npm run build",
