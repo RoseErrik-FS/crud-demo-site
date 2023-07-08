@@ -8,14 +8,13 @@
   "scripts": {
     "install-reactjs": "npm install --prefix reactjs",
     "install-api": "npm install --prefix api",
-    "dev": "concurrently \"npm run api\" \"npm run react\"",
-    "start": "cd api && npm start",
-    "build": "cd reactjs && npm run build",
-    "deploy": "npm run build && vercel --prod",
+    "build-reactjs": "npm run build --prefix reactjs",
+    "heroku-prebuild": "npm install --prefix reactjs && npm install --prefix api",
+    "heroku-postbuild": "concurrently \"npm run install-reactjs\" \"npm run build-reactjs\"",
+    "start": "npm start --prefix api",
+    "dev:react": "concurrently \"npm run api\" \"npm run react\"",
     "react": "cd reactjs && npm run start",
-    "api": "cd api && nodemon server.js",
-    "vercel-install": "npm install --prefix reactjs && npm install --prefix api",
-    "vercel-build": "concurrently \"npm run install-reactjs\" \"npm run build-reactjs\""
+    "api": "cd api && nodemon server.js"
   },
   "dependencies": {
     "concurrently": "^8.2.0"
