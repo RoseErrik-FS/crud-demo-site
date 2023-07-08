@@ -1,0 +1,19 @@
+{
+  "name": "crud-demo-site",
+  "version": "1.0.0",
+  "engines": {
+    "node": "18.16.0",
+    "npm": "9.5.1"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run api\" \"npm run react\"",
+    "start": "cd api && npm start",
+    "build": "cd reactjs && npm run build",
+    "deploy": "npm run build && vercel --prod",
+    "react": "cd reactjs && npm run start",
+    "api": "cd api && nodemon server.js"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
