@@ -11,7 +11,9 @@
     "build": "cd reactjs && npm run build",
     "deploy": "npm run build && vercel --prod",
     "react": "cd reactjs && npm run start",
-    "api": "cd api && nodemon server.js"
+    "api": "cd api && nodemon server.js",
+    "vercel-install": "npm install --prefix reactjs && npm install --prefix api",
+    "vercel-build": "concurrently \"npm run install-reactjs\" \"npm run build-reactjs\""
   },
   "dependencies": {
     "concurrently": "^8.2.0"
