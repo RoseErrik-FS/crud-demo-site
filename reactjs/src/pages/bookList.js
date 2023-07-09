@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import "../App.css";
 
@@ -17,19 +17,7 @@ function Dashboard() {
       ? `http://localhost:8000/api/v1`
       : process.env.REACT_APP_BASE_URL;
 
-  useEffect(() => {
-    let ignore = false;
-
-    if (!ignore) {
-      getBooks();
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  const getBooks = async () => {
+  const getBooks = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE}/books`);
@@ -40,7 +28,19 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_BASE]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!ignore) {
+      getBooks();
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [getBooks]);
 
   const createBook = async () => {
     try {
@@ -52,7 +52,7 @@ function Dashboard() {
         },
         body: JSON.stringify(values),
       });
-      getBooks(); // Fetch the updated list of books
+      getBooks();
     } catch (error) {
       setError(error.message || "Unexpected Error");
     } finally {
@@ -72,6 +72,14 @@ function Dashboard() {
       [event.target.name]: event.target.value,
     }));
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="App">

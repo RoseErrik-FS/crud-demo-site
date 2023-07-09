@@ -1,38 +1,26 @@
-import { useState, useEffect } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "../App.css";
 
 function Book() {
-  const [book, setBook] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [book, setBook] = useState(null); // State to store the book data
+  const [loading, setLoading] = useState(false); // State to indicate if data is being loaded
+  const [error, setError] = useState(null); // State to store error messages
   const [values, setValues] = useState({
     title: "",
     author: "",
     genre: "",
-  });
+  }); // State to store form input values
 
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams(); // Access the book ID from the URL parameters
+  const navigate = useNavigate(); // Hook to handle navigation
 
   const API_BASE =
     process.env.NODE_ENV === "development"
       ? `http://localhost:8000/api/v1`
       : process.env.REACT_APP_BASE_URL;
 
-  useEffect(() => {
-    let ignore = false;
-
-    if (!ignore) {
-      getBook();
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  const getBook = async () => {
+  const getBook = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE}/books/${id}`);
@@ -48,17 +36,29 @@ function Book() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, API_BASE]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!ignore) {
+      getBook();
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [getBook]);
 
   const deleteBook = async () => {
     try {
       setLoading(true);
       await fetch(`${API_BASE}/books/${id}`, {
         method: "DELETE",
-      });
-      navigate("/booklist", { replace: true });
+      }); // Delete the book from the API
+      navigate("/booklist", { replace: true }); // Navigate back to the book list page
     } catch (error) {
-      setError(error.message || "Unexpected Error");
+      setError(error.message || "Unexpected Error"); // Handle any errors that occur during deletion
     } finally {
       setLoading(false);
     }
@@ -72,12 +72,12 @@ function Book() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(values), // Send the updated form values as JSON in the request body
       });
       const data = await response.json();
       setBook(data); // Update the book state with the updated data
     } catch (error) {
-      setError(error.message || "Unexpected Error");
+      setError(error.message || "Unexpected Error"); // Handle any errors that occur during book update
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ function Book() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    updateBook();
+    updateBook(); // Call the updateBook function to update the book details
   };
 
   const handleInputChanges = (event) => {
@@ -93,8 +93,16 @@ function Book() {
     setValues((values) => ({
       ...values,
       [event.target.name]: event.target.value,
-    }));
+    })); // Update the form input values when they change
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="App">
