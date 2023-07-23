@@ -27,8 +27,9 @@ function Book({ currentAccount }) {
   const getBook = useCallback(async () => {
     try {
       setLoading(true);
+      const headers = authHeader();
       const response = await fetch(`${API_BASE}/books/${id}`, {
-        headers: authHeader(),
+        headers: headers.Authorization ? headers : undefined,
       });
       const data = await response.json();
       setBook(data);
@@ -129,7 +130,6 @@ function Book({ currentAccount }) {
         )}
         {currentAccount ? ( // Check if the user is logged in before rendering the form
           <form onSubmit={handleSubmit} className="mt-4">
-            {/* Input fields for updating book information */}
             <div className="flex flex-col mb-4">
               <label className="font-bold text-white">Title:</label>
               <input
@@ -175,7 +175,6 @@ function Book({ currentAccount }) {
             </div>
           </form>
         ) : (
-          // If the user is not logged in, show a message
           <p>Please log in to update the book.</p>
         )}
       </div>
