@@ -6,10 +6,11 @@
     "npm": "9.5.1"
   },
   "scripts": {
-    "install-reactjs": "npm install --prefix reactjs --only=prod",
+    "install-all": "npm install && npm run install-reactjs && npm run install-api",
+    "install-reactjs": "npm install --prefix reactjs",
     "install-api": "npm install --prefix api",
     "build-reactjs": "npm run build --prefix reactjs",
-    "heroku-prebuild": "npm run install-reactjs && npm run install-api",
+    "heroku-prebuild": "npm run install-all",
     "heroku-postbuild": "npm run build-reactjs",
     "start": "npm start --prefix api",
     "dev:react": "concurrently \"npm run api\" \"npm run react\"",
