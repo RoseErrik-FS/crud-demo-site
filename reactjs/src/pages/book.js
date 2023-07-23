@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../App.css";
+import authHeader from "../services/authHeader";
 
-function Book() {
+function Book({ currentAccount }) {
   // State variables
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,9 @@ function Book() {
   const getBook = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/books/${id}`);
+      const response = await fetch(`${API_BASE}/books/${id}`, {
+        headers: authHeader(),
+      });
       const data = await response.json();
       setBook(data);
       setValues({
@@ -43,15 +46,7 @@ function Book() {
 
   // Call getBook when the component mounts
   useEffect(() => {
-    let ignore = false;
-
-    if (!ignore) {
-      getBook();
-    }
-
-    return () => {
-      ignore = true;
-    };
+    getBook();
   }, [getBook]);
 
   // Delete book from the API
@@ -60,6 +55,9 @@ function Book() {
       setLoading(true);
       await fetch(`${API_BASE}/books/${id}`, {
         method: "DELETE",
+        headers: {
+          ...authHeader(),
+        },
       });
       navigate("/booklist", { replace: true });
     } catch (error) {
@@ -76,6 +74,7 @@ function Book() {
       const response = await fetch(`${API_BASE}/books/${id}`, {
         method: "PATCH",
         headers: {
+          ...authHeader(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
@@ -115,6 +114,7 @@ function Book() {
   }
 
   // Render book profile and update form
+
   return (
     <div className="container flex justify-center items-center h-screen">
       <div className="w-full lg:w-1/2">
@@ -127,52 +127,57 @@ function Book() {
             <p className="text-white">Genre: {book.genre}</p>
           </div>
         )}
-        {/* Update Book Form */}
-        <form onSubmit={handleSubmit} className="mt-4">
-          <div className="flex flex-col mb-4">
-            <label className="font-bold text-white">Title:</label>
-            <input
-              type="text"
-              name="title"
-              value={values.title}
-              onChange={handleInputChanges}
-              className="border border-gray-400 rounded p-2 text-black bg-white"
-            />
-          </div>
-          <div className="flex flex-col mb-4">
-            <label className="font-bold text-white">Author:</label>
-            <input
-              type="text"
-              name="author"
-              value={values.author}
-              onChange={handleInputChanges}
-              className="border border-gray-400 rounded p-2 text-black bg-white"
-            />
-          </div>
-          <div className="flex flex-col mb-4">
-            <label className="font-bold text-white">Genre:</label>
-            <input
-              type="text"
-              name="genre"
-              value={values.genre}
-              onChange={handleInputChanges}
-              className="border border-gray-400 rounded p-2 text-black bg-white"
-            />
-          </div>
-          <div className="flex justify-between">
-            <button
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-              onClick={deleteBook}
-            >
-              Delete Book
-            </button>
-            <input
-              type="submit"
-              value="Submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-            />
-          </div>
-        </form>
+        {currentAccount ? ( // Check if the user is logged in before rendering the form
+          <form onSubmit={handleSubmit} className="mt-4">
+            {/* Input fields for updating book information */}
+            <div className="flex flex-col mb-4">
+              <label className="font-bold text-white">Title:</label>
+              <input
+                type="text"
+                name="title"
+                value={values.title}
+                onChange={handleInputChanges}
+                className="border border-gray-400 rounded p-2 text-black bg-white"
+              />
+            </div>
+            <div className="flex flex-col mb-4">
+              <label className="font-bold text-white">Author:</label>
+              <input
+                type="text"
+                name="author"
+                value={values.author}
+                onChange={handleInputChanges}
+                className="border border-gray-400 rounded p-2 text-black bg-white"
+              />
+            </div>
+            <div className="flex flex-col mb-4">
+              <label className="font-bold text-white">Genre:</label>
+              <input
+                type="text"
+                name="genre"
+                value={values.genre}
+                onChange={handleInputChanges}
+                className="border border-gray-400 rounded p-2 text-black bg-white"
+              />
+            </div>
+            <div className="flex justify-between">
+              <button
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                onClick={deleteBook}
+              >
+                Delete Book
+              </button>
+              <input
+                type="submit"
+                value="Submit"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+              />
+            </div>
+          </form>
+        ) : (
+          // If the user is not logged in, show a message
+          <p>Please log in to update the book.</p>
+        )}
       </div>
     </div>
   );

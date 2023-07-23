@@ -1,11 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
+import bookServices from "../services/bookService";
+import authService from "../services/authService";
+import authHeader from "../services/authHeader";
 
 function Booklist() {
   // State variables
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [values, setValues] = useState({
     title: "",
@@ -13,38 +16,35 @@ function Booklist() {
     genre: "",
   });
 
-  // API base URL
+  const navigate = useNavigate();
+
   const API_BASE =
     process.env.NODE_ENV === "development"
       ? `http://localhost:8000/api/v1`
       : process.env.REACT_APP_BASE_URL;
 
-  // Fetch books from the API
-  const getBooks = useCallback(async () => {
+  // Function to fetch books from the API
+  const fetchBooks = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/books`);
-      const data = await response.json();
-      setBooks(data);
+      console.log("Fetching all books...");
+      const response = await bookServices.getAllBooks();
+      setBooks(response.data);
+      setLoading(false);
     } catch (error) {
+      console.log("Secure Page Error:", error.response);
+      if (error.response && error.response.status === 403) {
+        authService.logout();
+        navigate("/login");
+      }
       setError(error.message || "Unexpected Error");
-    } finally {
       setLoading(false);
     }
-  }, [API_BASE]);
+  };
 
-  // Call getBooks when the component mounts
+  // Fetch books when the component mounts
   useEffect(() => {
-    let ignore = false;
-
-    if (!ignore) {
-      getBooks();
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, [getBooks]);
+    fetchBooks();
+  }, []);
 
   // Create a new book
   const createBook = async () => {
@@ -53,11 +53,12 @@ function Booklist() {
       await fetch(`${API_BASE}/books`, {
         method: "POST",
         headers: {
+          ...authHeader(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
       });
-      getBooks();
+      fetchBooks(); // Refresh the books list after creating a new book
     } catch (error) {
       setError(error.message || "Unexpected Error");
     } finally {
