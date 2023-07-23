@@ -16,10 +16,13 @@ const tokenForAccount = (account) => {
   );
 };
 
+exports.signin = (req, res, next) => {
+  const account = req.user;
+  res.send({ token: tokenForAccount(account), account_id: account._id });
+};
+
 exports.signup = async (req, res, next) => {
   const { email, password } = req.body;
-  console.log("Received signup request for email:", email);
-  console.log("Received signup request for password:", password);
 
   if (!email || !password) {
     return res.status(422).json({ error: "Please Provide Login Credentials" });
@@ -27,16 +30,12 @@ exports.signup = async (req, res, next) => {
 
   try {
     const existingAccount = await Account.findOne({ email: email });
-    console.log("After finding existing account:", existingAccount);
-
-    console.log("Before saving account to the database");
     const account = new Account({
       email: email,
       password: password,
     });
 
     const savedAccount = await account.save();
-    console.log("Account saved to the database:", savedAccount);
     res.json({
       account_id: savedAccount._id,
       token: tokenForAccount(savedAccount),

@@ -1,6 +1,11 @@
 // api/routes/book.js
 const express = require("express");
+const passport = require("passport");
 const router = express.Router();
+
+const passportServices = require("../services/passport");
+
+const protectedRoute = passport.authenticate("jwt", { session: false });
 
 const Book = require("../models/book");
 
@@ -18,7 +23,7 @@ const getBook = async (req, res, next) => {
 };
 
 // GET all books
-router.get("/", async (req, res) => {
+router.get("/", protectedRoute, async (req, res) => {
   try {
     const books = await Book.find();
     res.json(books);
@@ -28,12 +33,12 @@ router.get("/", async (req, res) => {
 });
 
 // GET a single book
-router.get("/:id", getBook, async (req, res) => {
+router.get("/:id", protectedRoute, getBook, async (req, res) => {
   res.json(res.book);
 });
 
 // CREATE a new book
-router.post("/", async (req, res) => {
+router.post("/", protectedRoute, async (req, res) => {
   const book = new Book({
     title: req.body.title,
     author: req.body.author,
@@ -48,7 +53,7 @@ router.post("/", async (req, res) => {
 });
 
 // UPDATE a book
-router.patch("/:id", getBook, async (req, res) => {
+router.patch("/:id", protectedRoute, getBook, async (req, res) => {
   if (req.body.title != null) {
     res.book.title = req.body.title;
   }
@@ -67,7 +72,7 @@ router.patch("/:id", getBook, async (req, res) => {
 });
 
 // DELETE a book
-router.delete("/:id", getBook, async (req, res) => {
+router.delete("/:id", protectedRoute, getBook, async (req, res) => {
   try {
     await Book.findByIdAndDelete(req.params.id);
     res.json({ message: "Book removed" });
