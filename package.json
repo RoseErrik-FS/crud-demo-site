@@ -10,7 +10,7 @@
     "install-api": "npm install --prefix api",
     "build-reactjs": "npm run build --prefix reactjs",
     "heroku-prebuild": "npm run install-reactjs && npm run install-api",
-    "heroku-postbuild": "concurrently \"npm run build-reactjs\" \"npm run install-api\"",
+    "heroku-postbuild": "npm run build-reactjs",
     "start": "npm start --prefix api",
     "dev:react": "concurrently \"npm run api\" \"npm run react\"",
     "react": "cd reactjs && npm run start",
