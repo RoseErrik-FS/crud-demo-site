@@ -1,7 +1,9 @@
 // api/controllers/auth_controller.js
 const Account = require("../models/account");
 const jwt = require("jwt-simple");
-const config = require("../config");
+require("dotenv").config();
+
+const jwtSecret = process.env.JWT_SECRET;
 
 const tokenForAccount = (account) => {
   const timestamp = new Date().getTime();
@@ -10,7 +12,7 @@ const tokenForAccount = (account) => {
       sub: account._id,
       iat: timestamp,
     },
-    config.secret
+    jwtSecret
   );
 };
 
