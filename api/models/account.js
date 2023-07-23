@@ -1,16 +1,18 @@
+// api/models/account.js
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+
+const validateEmail = (email) => {
+  return /^\S+@\S+\.\S+$/.test(email);
+};
 
 const AccountSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
   email: {
     type: String,
-    required: true,
+    required: "Email address is required",
     unique: true,
+    lowercase: true,
+    validate: [validateEmail, "Email Invalid"],
     trim: true,
   },
   password: {
@@ -22,6 +24,20 @@ const AccountSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+});
+
+AccountSchema.pre("save", async function (next) {
+  if (this.isNew || this.isModified("password")) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+      next();
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    next();
+  }
 });
 
 const Account = mongoose.model("Account", AccountSchema);
